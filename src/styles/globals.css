@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed; /* Ensures fixed table layout */
+  font-size: small;
+  margin-top: 6px;
+}
+th,
+td {
+  border: 1px solid black;
+  padding: 6px;
+  text-align: left;
+  font-weight: 500;
+  overflow-wrap: break-word; /* For Breaking long words */
+  text-overflow: ellipsis; /* Adds ellipsis for overflowed text */
+  overflow: hidden; /* Hides overflowed text */
+}
+.col1 {
+  width: 30%;
+}
+.col2 {
+  width: 70%;
+}
+.checkbox-group {
+  display: flex;
+  gap: 10px;
+}
+.nested-table {
+  width: 100%;
+  border-collapse: collapse;
+  border-collapse: separate;
+}
+.nested-table td {
+  border: none;
+  padding: 1px;
+  text-align: center;
+}
+.nested-table th,
+.nested-table td {
+  border: 1px solid black;
+}
+
+#hdcntr {
+  text-align: center;
+}

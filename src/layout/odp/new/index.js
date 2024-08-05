@@ -8,8 +8,20 @@ import ServiceSection from "./ServiceSection";
 import PaymentCollectionSection from "./PaymentCollectionSection";
 import DiscountSection from "./DiscountSection";
 import ReferralInfoSection from "./ReferralInfoSection";
+import {
+  collection,
+  addDoc,
+  serverTimestamp,
+  getFirestore,
+} from "firebase/firestore";
+import { useRouter } from "next/router";
+
+// Initialize Firestore
+const db = getFirestore();
 
 const OPDNewLayout = () => {
+  const router = useRouter();
+
   const [formData, setFormData] = useState({
     mobile: "",
     firstName: "",
@@ -57,9 +69,20 @@ const OPDNewLayout = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
-    // Add any necessary form validation or data processing here
-    window.location.href = "/opd/prev";
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      await addDoc(collection(db, "patients"), {
+        ...formData,
+        timestamp: serverTimestamp(),
+      });
+
+      console.log("Document successfully added!");
+      router.push("/opd/prev");
+    } catch (error) {
+      console.error("Error adding document: ", error);
+    }
   };
 
   return (

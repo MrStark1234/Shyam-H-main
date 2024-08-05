@@ -1,6 +1,80 @@
 import React from "react";
+import {
+  getFirestore,
+  collection,
+  query,
+  orderBy,
+  limit,
+  getDocs,
+} from "firebase/firestore";
 
-const Prev = () => {
+const db = getFirestore();
+
+export async function getServerSideProps() {
+  try {
+    const q = query(
+      collection(db, "patients"),
+      orderBy("timestamp", "desc"),
+      limit(1)
+    );
+
+    const querySnapshot = await getDocs(q);
+    let data = null;
+
+    querySnapshot.forEach((doc) => {
+      data = doc.data();
+
+      if (data.timestamp && data.timestamp.toDate) {
+        data.timestamp = data.timestamp.toDate().toISOString().toLocaleString();
+      }
+    });
+
+    return {
+      props: {
+        data: data || null,
+      },
+    };
+  } catch (error) {
+    console.error("Error fetching latest patient: ", error);
+    return {
+      props: {
+        data: null,
+      },
+    };
+  }
+}
+
+const Prev = ({ data }) => {
+  if (!data) {
+    return <div>No recent data found.</div>;
+  }
+
+  const {
+    firstName,
+    lastName,
+    age,
+    ageType,
+    gender,
+    mobile,
+    kinName,
+    kinRelation,
+    kinPhoneNumber,
+    address,
+    state,
+    paymentMethod,
+    companyName,
+    service,
+    consultationType,
+    doctor,
+    charges,
+    amountToBeCollected,
+    paymentBy,
+    referenceId,
+    discountPercentage,
+    discountAmount,
+    discountReason,
+    referrerName,
+  } = data;
   return (
     <div className="flex flex-col justify-center items-center min-h-lvh">
       <div className="w-full max-w-4xl">
@@ -37,12 +111,16 @@ const Prev = () => {
                     <div className="font-bold">Kin Name </div>
                   </div>
                   <div className="val flex flex-col justify-end">
-                    <div>: </div>
-                    <div>: </div>
-                    <div>: </div>
-                    <div>: </div>
-                    <div>: </div>
-                    <div>: </div>
+                    <div>: {referenceId || ""}</div>
+                    <div>
+                      : {firstName} {lastName}
+                    </div>
+                    <div>
+                      : {age} {ageType}
+                    </div>
+                    <div>: {gender}</div>
+                    <div>: {mobile}</div>
+                    <div>: {kinName}</div>
                   </div>
                 </div>
                 <div className="right flex flex-row gap-12 p-4">
@@ -55,12 +133,12 @@ const Prev = () => {
                     <div className="font-bold">Referral </div>
                   </div>
                   <div className="val flex flex-col justify-end">
-                    <div>: </div>
-                    <div>: </div>
-                    <div>: </div>
-                    <div>: </div>
-                    <div>: </div>
-                    <div>: </div>
+                    <div>: {data.timestamp || ""}</div>
+                    <div>: {referenceId || ""}</div>
+                    <div>: {companyName || ""}</div>
+                    <div>: {doctor || ""}</div>
+                    <div>: {service || ""}</div>
+                    <div>: {referrerName || ""}</div>
                   </div>
                 </div>
               </div>

@@ -8,15 +8,11 @@ import ServiceSection from "./ServiceSection";
 import PaymentCollectionSection from "./PaymentCollectionSection";
 import DiscountSection from "./DiscountSection";
 import ReferralInfoSection from "./ReferralInfoSection";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { db } from "../../../lib/firebase";
-import { useRouter } from "next/router";
+import { useRouter } from "next/router"; // For redirection
 
 // Initialize Firestore
 
 const OPDNewLayout = () => {
-  const router = useRouter();
-
   const [formData, setFormData] = useState({
     mobile: "",
     firstName: "",
@@ -46,6 +42,8 @@ const OPDNewLayout = () => {
 
   const [userName, setUserName] = useState("Logged in User"); // Replace with actual logic to get the logged-in user's name
 
+  const router = useRouter(); // Hook for navigation
+
   const handleInputChange = (field, value) => {
     setFormData((prevData) => ({
       ...prevData,
@@ -64,21 +62,26 @@ const OPDNewLayout = () => {
     }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
+  const handleSubmit = async () => {
     try {
-      await addDoc(collection(db, "patients"), {
-        ...formData,
-        timestamp: serverTimestamp(),
+      const response = await fetch("http://localhost:80/patients", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
       });
 
-      console.log("Document successfully added!");
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       router.push("/opd/prev");
     } catch (error) {
-      console.error("Error adding document: ", error);
+      console.error("Failed to submit form data:", error);
     }
   };
+
   return (
     <Layout>
       <div className="container mx-auto p-4 space-y-8">

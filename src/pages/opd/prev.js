@@ -1,14 +1,8 @@
-import React from "react";
-import {
-  getFirestore,
-  collection,
-  query,
-  orderBy,
-  limit,
-  getDocs,
-} from "firebase/firestore";
-
-const db = getFirestore();
+import React, { useRef } from "react";
+import { collection, getDocs, orderBy, limit, query } from "firebase/firestore";
+import { db } from "../../lib/firebase";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 export async function getServerSideProps() {
   try {
@@ -25,7 +19,7 @@ export async function getServerSideProps() {
       data = doc.data();
 
       if (data.timestamp && data.timestamp.toDate) {
-        data.timestamp = data.timestamp.toDate().toISOString().toLocaleString();
+        data.timestamp = data.timestamp.toDate().toLocaleString(); // Ensure correct date conversion
       }
     });
 
@@ -45,6 +39,9 @@ export async function getServerSideProps() {
 }
 
 const Prev = ({ data }) => {
+  const page1Ref = useRef();
+  const page2Ref = useRef();
+
   if (!data) {
     return <div>No recent data found.</div>;
   }
@@ -75,11 +72,132 @@ const Prev = ({ data }) => {
     discountReason,
     referrerName,
   } = data;
+
+  // const generatePDF = async () => {
+  //   const pdf = new jsPDF("p", "pt", "a4");
+
+  //
+  //   const scale = 2;
+
+  //
+  //   const canvas1 = await html2canvas(page1Ref.current, { scale });
+  //   const imgData1 = canvas1.toDataURL("image/png", 1.0);
+  //   pdf.addImage(
+  //     imgData1,
+  //     "PNG",
+  //     0,
+  //     0,
+  //     pdf.internal.pageSize.getWidth(),
+  //     pdf.internal.pageSize.getHeight(),
+  //     undefined,
+  //     "FAST"
+  //   );
+
+  //
+  //   pdf.addPage();
+
+  //
+  //   const canvas2 = await html2canvas(page2Ref.current, { scale });
+  //   const imgData2 = canvas2.toDataURL("image/png", 1.0);
+  //   pdf.addImage(
+  //     imgData2,
+  //     "PNG",
+  //     0,
+  //     0,
+  //     pdf.internal.pageSize.getWidth(),
+  //     pdf.internal.pageSize.getHeight(),
+  //     undefined,
+  //     "FAST"
+  //   );
+
+  //
+  //   pdf.save("opd-assessment.pdf");
+  // };
+
+  const generatePDF = async () => {
+    const pdf = new jsPDF("p", "pt", "a4");
+
+    const scale = 2;
+
+    const canvas1 = await html2canvas(page1Ref.current, {
+      scale,
+      useCORS: true,
+      scrollX: 0,
+      scrollY: 0,
+    });
+    const imgData1 = canvas1.toDataURL("image/png", 1.0);
+
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+
+    const imgWidth1 = canvas1.width / scale;
+    const imgHeight1 = canvas1.height / scale;
+    const ratio1 = imgWidth1 / imgHeight1;
+    let pdfImageWidth1 = pdfWidth;
+    let pdfImageHeight1 = pdfImageWidth1 / ratio1;
+
+    if (pdfImageHeight1 > pdfHeight) {
+      pdfImageHeight1 = pdfHeight;
+      pdfImageWidth1 = pdfImageHeight1 * ratio1;
+    }
+
+    pdf.addImage(
+      imgData1,
+      "PNG",
+      0,
+      0,
+      pdfImageWidth1,
+      pdfImageHeight1,
+      undefined,
+      "FAST"
+    );
+
+    pdf.addPage();
+
+    const canvas2 = await html2canvas(page2Ref.current, {
+      scale,
+      useCORS: true,
+      scrollX: 0,
+      scrollY: 0,
+    });
+    const imgData2 = canvas2.toDataURL("image/png", 1.0);
+
+    const imgWidth2 = canvas2.width / scale;
+    const imgHeight2 = canvas2.height / scale;
+    const ratio2 = imgWidth2 / imgHeight2;
+    let pdfImageWidth2 = pdfWidth;
+    let pdfImageHeight2 = pdfImageWidth2 / ratio2;
+
+    if (pdfImageHeight2 > pdfHeight) {
+      pdfImageHeight2 = pdfHeight;
+      pdfImageWidth2 = pdfImageHeight2 * ratio2;
+    }
+
+    pdf.addImage(
+      imgData2,
+      "PNG",
+      0,
+      0,
+      pdfImageWidth2,
+      pdfImageHeight2,
+      undefined,
+      "FAST"
+    );
+
+    pdf.save("opd-assessment.pdf");
+  };
+
   return (
     <div className="flex flex-col justify-center items-center min-h-lvh">
       <div className="w-full max-w-4xl">
+        <button
+          onClick={generatePDF}
+          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+        >
+          Download PDF
+        </button>
         {/* Page-1 */}
-        <div className="p-8">
+        <div className="p-8" ref={page1Ref}>
           <div className="main border border-black w-full">
             <div className="text-center">
               <h1 className="font-bold">SHRI SHYAM HOSPITAL</h1>
@@ -273,7 +391,7 @@ const Prev = ({ data }) => {
         </div>
 
         {/* Page-2 */}
-        <div className="p-8">
+        <div className="p-8" ref={page2Ref}>
           <div className="main border  border-black w-full p-8">
             <h3 className="font-bold">Medication Advised</h3>
             <div className="table-container">

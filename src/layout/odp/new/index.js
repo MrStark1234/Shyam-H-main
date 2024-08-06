@@ -8,16 +8,11 @@ import ServiceSection from "./ServiceSection";
 import PaymentCollectionSection from "./PaymentCollectionSection";
 import DiscountSection from "./DiscountSection";
 import ReferralInfoSection from "./ReferralInfoSection";
-import {
-  collection,
-  addDoc,
-  serverTimestamp,
-  getFirestore,
-} from "firebase/firestore";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { db } from "../../../lib/firebase";
 import { useRouter } from "next/router";
 
 // Initialize Firestore
-const db = getFirestore();
 
 const OPDNewLayout = () => {
   const router = useRouter();
@@ -84,7 +79,6 @@ const OPDNewLayout = () => {
       console.error("Error adding document: ", error);
     }
   };
-
   return (
     <Layout>
       <div className="container mx-auto p-4 space-y-8">
